@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환자 관리 - 의료 이미지 진단 지원 시스템</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary-color: #26a69a;
+            --accent-color: #ff5722;
+            --normal-color: #4caf50;
+            --abnormal-color: #f44336;
+            --light-bg: #f5f7fa;
+            --dark-text: #37474f;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            padding-top: 20px;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .header-logo {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .card-body {
+            padding: 25px;
+        }
+        .btn {
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.3);
+        }
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.2);
+        }
+        footer {
+            margin-top: 60px;
+            padding: 25px 0;
+            background-color: #37474f;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark-text);
+            margin: 0 5px;
+            padding: 8px 15px !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: rgba(30, 136, 229, 0.1);
+            color: var(--primary-color);
+        }
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .stats-card {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-card-primary {
+            background: linear-gradient(135deg, #42a5f5, #1976d2);
+            color: white;
+        }
+        .stats-card-success {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+            color: white;
+        }
+        .stats-card-danger {
+            background: linear-gradient(135deg, #ef5350, #e53935);
+            color: white;
+        }
+        .stats-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        .stats-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .table thead th {
+            font-weight: 600;
+            border: none;
+            padding: 15px 20px;
+        }
+        .table tbody tr {
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f8fe;
+        }
+        .table tbody td {
+            padding: 15px 20px;
+            vertical-align: middle;
+            border-color: #e9edf2;
+        }
+        .patient-id {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .badge {
+            padding: 6px 12px;
+            font-weight: 500;
+            border-radius: 30px;
+        }
+        .badge-normal {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--normal-color);
+        }
+        .badge-abnormal {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--abnormal-color);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+        .empty-icon {
+            font-size: 5rem;
+            color: #b0bec5;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="의료 이미지 AI 로고" class="header-logo">
+                    의료 이미지 진단 지원 시스템
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="bi bi-house-door"></i> 홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/patients"><i class="bi bi-people"></i> 환자 관리</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about"><i class="bi bi-info-circle"></i> 소개</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 플래시 메시지 표시 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-people"></i> 환자 관리 시스템</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">의료 이미지 진단 지원 시스템에 등록된 모든 환자 정보와 검사 결과를 관리합니다.</p>
+                        <a href="/" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>새 검사 시작하기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통계 대시보드 -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card stats-card-primary">
+                    <i class="bi bi-people-fill stats-icon"></i>
+                    <div class="stats-value">{{ patients|length }}</div>
+                    <div class="stats-label">총 환자수</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card stats-card-success">
+                    <i class="bi bi-check-circle-fill stats-icon"></i>
+                    <div class="stats-value">
+                        {% set normal_count = 0 %}
+                        {% for patient in patients %}
+                            {% for exam in patient.examinations if exam.result == '정상' %}
+                                {% set normal_count = normal_count + 1 %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ normal_count }}
+                    </div>
+                    <div class="stats-label">정상 결과</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card stats-card-danger">
+                    <i class="bi bi-exclamation-triangle-fill stats-icon"></i>
+                    <div class="stats-value">
+                        {% set abnormal_count = 0 %}
+                        {% for patient in patients %}
+                            {% for exam in patient.examinations if exam.result == '비정상' %}
+                                {% set abnormal_count = abnormal_count + 1 %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ abnormal_count }}
+                    </div>
+                    <div class="stats-label">비정상 결과</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 환자 목록 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="bi bi-list-ul"></i> 환자 목록</h4>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" class="form-control" id="patient-search" placeholder="환자 검색...">
+                            <button class="btn btn-outline-primary" type="button" title="환자 검색">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if patients and patients|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>환자 ID</th>
+                                        <th>이름</th>
+                                        <th>성별</th>
+                                        <th>나이</th>
+                                        <th>검사 수</th>
+                                        <th>최근 검사일</th>
+                                        <th>관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for patient in patients %}
+                                    <tr>
+                                        <td class="patient-id">{{ patient.patient_id }}</td>
+                                        <td>{{ patient.name }}</td>
+                                        <td>
+                                            {% if patient.sex == 'M' %}
+                                            <i class="bi bi-gender-male text-primary"></i> 남성
+                                            {% elif patient.sex == 'F' %}
+                                            <i class="bi bi-gender-female text-danger"></i> 여성
+                                            {% else %}
+                                            <i class="bi bi-question-circle"></i> 기타
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ patient.age }}세</td>
+                                        <td>
+                                            <span class="badge {% if patient.exam_count > 0 %}bg-primary{% else %}bg-secondary{% endif %}">
+                                                {{ patient.exam_count }}
+                                            </span>
+                                        </td>
+                                        <td>{{ patient.last_exam|default('없음') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('patient_detail', patient_id=patient.patient_id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> 상세
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-people empty-icon"></i>
+                            <h4 class="mb-3">등록된 환자가 없습니다</h4>
+                            <p class="text-muted mb-4">새로운 검사를 시작하여 환자 정보를 등록해보세요.</p>
+                            <a href="/" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>새 검사 시작하기
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center">
+        <div class="container">
+            <p><i class="bi bi-heart-fill me-2 text-danger"></i> 2023 의료 이미지 진단 지원 시스템. All rights reserved.</p>
+            <p><i class="bi bi-award me-2"></i> AI 소프트웨어학과 포트폴리오 프로젝트</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 환자 검색 기능
+            const searchInput = document.getElementById('patient-search');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const searchValue = this.value.toLowerCase();
+                    const tableRows = document.querySelectorAll('tbody tr');
+                    
+                    tableRows.forEach(row => {
+                        const patientId = row.querySelector('.patient-id').textContent.toLowerCase();
+                        const patientName = row.cells[1].textContent.toLowerCase();
+                        
+                        if (patientId.includes(searchValue) || patientName.includes(searchValue)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

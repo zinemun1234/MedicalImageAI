@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>의료 이미지 진단 지원 시스템</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.svg') }}" type="image/svg+xml">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary-color: #26a69a;
+            --accent-color: #ff5722;
+            --normal-color: #4caf50;
+            --abnormal-color: #f44336;
+            --light-bg: #f5f7fa;
+            --dark-text: #37474f;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            padding-top: 20px;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .header-logo {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .jumbotron {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid var(--primary-color);
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .btn {
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.3);
+        }
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.2);
+        }
+        .upload-area {
+            border: 2px dashed #b0bec5;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #e3f2fd;
+        }
+        .upload-area i {
+            font-size: 54px;
+            color: var(--primary-color);
+            opacity: 0.8;
+        }
+        .preview-container {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #preview-name {
+            margin-top: 15px;
+            font-weight: 500;
+            color: #546e7a;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .form-label {
+            font-weight: 500;
+            color: #546e7a;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #cfd8dc;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
+        }
+        .tab-content {
+            padding: 25px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .nav-tabs {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .nav-tabs .nav-link {
+            font-weight: 500;
+            color: var(--dark-text);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px 12px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+        .nav-tabs .nav-link:hover {
+            background-color: rgba(30, 136, 229, 0.1);
+            border-color: transparent;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
+        }
+        .features-section {
+            margin-top: 40px;
+        }
+        .feature-item {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        footer {
+            margin-top: 60px;
+            padding: 25px 0;
+            background-color: #37474f;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark-text);
+            margin: 0 5px;
+            padding: 8px 15px !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: rgba(30, 136, 229, 0.1);
+            color: var(--primary-color);
+        }
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #submit-btn {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            font-size: 1.1rem;
+        }
+        #submit-btn:disabled {
+            background-color: #b0bec5;
+            border-color: #b0bec5;
+            cursor: not-allowed;
+        }
+        #patient-id-random {
+            font-size: 0.9rem;
+            margin-left: 10px;
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .file-input-hidden {
+            display: none;
+        }
+        .large-icon {
+            font-size: 8rem;
+            color: var(--primary-color);
+            opacity: 0.2;
+        }
+        .dicom-placeholder {
+            max-width: 300px;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="의료 이미지 AI 로고" class="header-logo">
+                    의료 이미지 진단 지원 시스템
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/"><i class="bi bi-house-door"></i> 홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/patients"><i class="bi bi-people me-1"></i> 환자 관리</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard"><i class="bi bi-graph-up me-1"></i> 대시보드</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about"><i class="bi bi-info-circle me-1"></i> 정보</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 플래시 메시지 표시 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="jumbotron">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold"><i class="bi bi-clipboard2-pulse me-2"></i>의료 이미지 AI 진단 지원</h1>
+                    <p class="lead mt-3">인공지능 기술을 활용한 의료 이미지 분석 및 진단 지원 시스템입니다. X-ray, MRI, CT 및 DICOM 이미지를 분석하여 비정상 패턴을 탐지합니다.</p>
+                    <hr class="my-4">
+                    <p><i class="bi bi-info-circle me-2"></i>아래 양식에서 이미지를 업로드하고 환자 정보를 입력하여 진단 결과를 확인하세요.</p>
+                </div>
+                <div class="col-md-4 text-center d-none d-md-block">
+                    <i class="bi bi-activity large-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-image me-2"></i>이미지 업로드 및 환자 정보</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 탭 네비게이션 -->
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="true">
+                                    <i class="bi bi-cloud-upload me-2"></i>이미지 업로드
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="patient-tab" data-bs-toggle="tab" data-bs-target="#patient" type="button" role="tab" aria-controls="patient" aria-selected="false">
+                                    <i class="bi bi-person-badge me-2"></i>환자 정보
+                                </button>
+                            </li>
+                        </ul>
+
+                        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data" onsubmit="return false;">
+                            <div class="tab-content" id="myTabContent">
+                                <!-- 이미지 업로드 탭 -->
+                                <div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                                    <div class="upload-area" id="dropzone">
+                                        <input type="file" name="file" id="file-input" accept=".png,.jpg,.jpeg,.bmp,.dcm,.dicom" class="file-input-hidden">
+                                        <i class="bi bi-cloud-arrow-up mb-3"></i>
+                                        <h5>이미지 파일을 끌어다 놓거나 클릭하여 업로드하세요</h5>
+                                        <p class="text-muted mt-2">지원 형식: PNG, JPG, JPEG, BMP, DICOM</p>
+                                    </div>
+                                    <div class="preview-container" id="preview-container">
+                                        <div class="text-center">
+                                            <img class="preview-image" id="preview-image" src="#" alt="이미지 미리보기">
+                                            <p id="preview-name">파일명: </p>
+                                        </div>
+                                        <div class="alert alert-info mt-3">
+                                            <i class="bi bi-info-circle-fill me-2"></i> 
+                                            <span id="dicom-message">이미지가 준비되었습니다. 환자 정보 탭에서 정보를 입력하세요.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 환자 정보 탭 -->
+                                <div class="tab-pane fade" id="patient" role="tabpanel" aria-labelledby="patient-tab">
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <label for="patient_id" class="form-label">환자 ID</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="patient_id" name="patient_id" placeholder="환자 ID를 입력하세요">
+                                                <span class="input-group-text bg-light text-primary" id="patient-id-random" title="랜덤 ID 생성">
+                                                    <i class="bi bi-dice-5"></i>
+                                                </span>
+                                            </div>
+                                            <div class="form-text">자동 생성된 ID를 사용하거나 직접 입력하세요.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="patient_name" class="form-label">환자 이름</label>
+                                            <input type="text" class="form-control" id="patient_name" name="patient_name" placeholder="환자 이름">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="patient_age" class="form-label">나이</label>
+                                            <input type="number" class="form-control" id="patient_age" name="patient_age" placeholder="나이" min="0" max="120">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="patient_sex" class="form-label">성별</label>
+                                            <select class="form-select" id="patient_sex" name="patient_sex">
+                                                <option value="" selected>선택하세요</option>
+                                                <option value="M">남성</option>
+                                                <option value="F">여성</option>
+                                                <option value="O">기타</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="modality" class="form-label">검사 종류</label>
+                                            <select class="form-select" id="modality" name="modality">
+                                                <option value="" selected>선택하세요</option>
+                                                <option value="X-ray">X-ray</option>
+                                                <option value="CT">CT</option>
+                                                <option value="MRI">MRI</option>
+                                                <option value="Ultrasound">초음파</option>
+                                                <option value="PET">PET</option>
+                                                <option value="Mammography">유방촬영</option>
+                                                <option value="Other">기타</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="study_date" class="form-label">검사일</label>
+                                            <input type="date" class="form-control" id="study_date" name="study_date">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" id="submit-btn" class="btn btn-primary" disabled onclick="uploadImage()">
+                                <i class="bi bi-check2-circle me-2"></i>이미지 분석하기
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>사용 안내</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>의료 이미지 진단 지원 시스템은 다음과 같은 단계로 사용할 수 있습니다:</p>
+                        <ol>
+                            <li class="mb-2">이미지 업로드 탭에서 의료 이미지 파일을 업로드합니다.</li>
+                            <li class="mb-2">환자 정보 탭에서 환자의 기본 정보를 입력합니다.</li>
+                            <li class="mb-2">'이미지 분석하기' 버튼을 클릭하여 AI 분석을 시작합니다.</li>
+                            <li class="mb-2">분석 결과와 이상 부위 시각화를 확인합니다.</li>
+                            <li>PDF 보고서를 다운로드하여 저장할 수 있습니다.</li>
+                        </ol>
+                        <div class="alert alert-primary mt-3">
+                            <i class="bi bi-lightbulb-fill me-2"></i> 
+                            <strong>DICOM 파일 지원</strong>: 의료용 DICOM 파일을 업로드하면 환자 메타데이터가 자동으로 추출됩니다.
+                        </div>
+                        <a href="/patients" class="btn btn-outline-primary mt-3 w-100">
+                            <i class="bi bi-people me-2"></i>환자 관리 페이지로 이동
+                        </a>
+                        <a href="/model_selection" class="btn btn-outline-secondary mt-2 w-100">
+                            <i class="bi bi-cpu me-2"></i>AI 모델 선택하기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-section">
+            <h3 class="mb-4 text-center">주요 기능</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon text-center">
+                            <i class="bi bi-filetype-jpg"></i>
+                        </div>
+                        <h4 class="mb-3 text-center">다양한 포맷 지원</h4>
+                        <p>PNG, JPG, JPEG, BMP와 같은 일반 이미지 형식과 의료 표준 DICOM 파일을 모두 지원합니다.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon text-center">
+                            <i class="bi bi-braces"></i>
+                        </div>
+                        <h4 class="mb-3 text-center">딥러닝 AI 분석</h4>
+                        <p>최신 CNN 기반 딥러닝 모델을 활용하여 의료 이미지 내 비정상 패턴을 탐지합니다.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon text-center">
+                            <i class="bi bi-thermometer-half"></i>
+                        </div>
+                        <h4 class="mb-3 text-center">이상 부위 시각화</h4>
+                        <p>Grad-CAM 기술을 활용하여 AI가 이상 징후를 발견한 부분을 히트맵으로 시각화합니다.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon text-center">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </div>
+                        <h4 class="mb-3 text-center">PDF 보고서 생성</h4>
+                        <p>환자 정보, 분석 결과, 이미지가 포함된 상세 진단 보고서를 PDF로 제공합니다.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon text-center">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h4 class="mb-3 text-center">환자 관리 시스템</h4>
+                        <p>환자 데이터를 저장하고 과거 검사 이력을 조회할 수 있는 통합 관리 기능을 제공합니다.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon text-center">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h4 class="mb-3 text-center">안전한 데이터 처리</h4>
+                        <p>모든 데이터는 로컬에서 처리되어 개인정보 보안을 유지하며, 환자 데이터가 외부로 유출되지 않습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center">
+        <div class="container">
+            <p><i class="bi bi-heart-fill me-2 text-danger"></i> 2023 의료 이미지 진단 지원 시스템. All rights reserved.</p>
+            <p><i class="bi bi-award me-2"></i> AI 소프트웨어학과 포트폴리오 프로젝트</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('file-input');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview-image');
+            const previewName = document.getElementById('preview-name');
+            const submitBtn = document.getElementById('submit-btn');
+            const patientIdRandom = document.getElementById('patient-id-random');
+            const patientIdInput = document.getElementById('patient_id');
+            const dicomMessage = document.getElementById('dicom-message');
+            const patientTab = document.getElementById('patient-tab');
+            
+            // 랜덤 환자 ID 생성
+            function generateRandomId() {
+                return 'P' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+            }
+            
+            // 페이지 로드 시 랜덤 ID 생성
+            patientIdInput.value = generateRandomId();
+            
+            // 랜덤 ID 버튼 클릭 이벤트
+            patientIdRandom.addEventListener('click', function() {
+                patientIdInput.value = generateRandomId();
+            });
+
+            // 드래그 앤 드롭 처리
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropzone.classList.add('border-primary');
+                dropzone.style.backgroundColor = '#e3f2fd';
+            }
+
+            function unhighlight() {
+                dropzone.classList.remove('border-primary');
+                dropzone.style.backgroundColor = 'white';
+            }
+
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // 파일 입력 클릭 이벤트
+            dropzone.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    
+                    // 파일 타입 확인
+                    const fileType = file.name.split('.').pop().toLowerCase();
+                    if (!['png', 'jpg', 'jpeg', 'bmp', 'dcm', 'dicom'].includes(fileType)) {
+                        alert('지원하지 않는 파일 형식입니다. PNG, JPG, JPEG, BMP, DICOM 파일만 업로드할 수 있습니다.');
+                        return;
+                    }
+                    
+                    // DICOM 파일 확인
+                    if (fileType === 'dcm' || fileType === 'dicom') {
+                        dicomMessage.textContent = 'DICOM 파일이 감지되었습니다. 환자 정보 탭으로 이동하세요.';
+                    } else {
+                        dicomMessage.textContent = '이미지가 준비되었습니다. 환자 정보 탭에서 정보를 입력하세요.';
+                    }
+                    
+                    // 이미지 미리보기
+                    if (fileType === 'dcm' || fileType === 'dicom') {
+                        // DICOM 파일은 미리보기 대신 아이콘 표시
+                        previewImage.src = 'https://via.placeholder.com/300x300?text=DICOM+파일';
+                        previewImage.classList.add('dicom-placeholder');
+                    } else {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImage.src = e.target.result;
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                    
+                    previewName.textContent = '파일명: ' + file.name;
+                    previewContainer.style.display = 'block';
+                    submitBtn.disabled = false;
+                    
+                    // DICOM 파일인 경우 자동으로 환자 정보 탭으로 이동
+                    if (fileType === 'dcm' || fileType === 'dicom') {
+                        setTimeout(() => {
+                            patientTab.click();
+                        }, 1000);
+                    }
+                }
+            }
+        });
+        
+        // 이미지 업로드 함수
+        function uploadImage() {
+            console.log("이미지 업로드 함수 실행");
+            const fileInput = document.getElementById('file-input');
+            
+            // 파일 확인
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('업로드할 파일을 선택해주세요.');
+                return;
+            }
+            
+            // FormData 생성
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('patient_id', document.getElementById('patient_id').value);
+            formData.append('patient_name', document.getElementById('patient_name').value);
+            
+            // 업로드 요청 (로딩 표시 없이)
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 즉시 결과 페이지로 이동
+                    window.location.href = data.redirect_url || '/result';
+                } else {
+                    alert('오류: ' + (data.error || '이미지 처리 중 오류가 발생했습니다.'));
+                }
+            })
+            .catch(error => {
+                alert('서버 요청 중 오류가 발생했습니다. 다시 시도해주세요.');
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html> 

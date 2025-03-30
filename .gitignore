@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 데이터셋 및 대용량 파일
+data/
+models/*.h5
+*.zip
+*.tar.gz
+app/static/uploads/
+
+# 로그 파일
+logs/
+*.log
+
+# 기타
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+training_history.png 

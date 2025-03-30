@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환자 상세 정보 - 의료 이미지 진단 지원 시스템</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary-color: #26a69a;
+            --accent-color: #ff5722;
+            --normal-color: #4caf50;
+            --abnormal-color: #f44336;
+            --light-bg: #f5f7fa;
+            --dark-text: #37474f;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            padding-top: 20px;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .header-logo {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .card-body {
+            padding: 25px;
+        }
+        .btn {
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.3);
+        }
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.2);
+        }
+        footer {
+            margin-top: 60px;
+            padding: 25px 0;
+            background-color: #37474f;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark-text);
+            margin: 0 5px;
+            padding: 8px 15px !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: rgba(30, 136, 229, 0.1);
+            color: var(--primary-color);
+        }
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .patient-info {
+            border-left: 5px solid var(--primary-color);
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .patient-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .info-item {
+            margin-bottom: 5px;
+        }
+        .info-label {
+            font-weight: 500;
+            color: #78909c;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .info-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 45px;
+            margin-top: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #e0e0e0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .timeline-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -45px;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: 4px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        .timeline-item.normal::before {
+            background-color: var(--normal-color);
+        }
+        .timeline-item.abnormal::before {
+            background-color: var(--abnormal-color);
+        }
+        .timeline-date {
+            background-color: rgba(30, 136, 229, 0.1);
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 5px 15px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-text);
+        }
+        .timeline-body {
+            margin-top: 15px;
+        }
+        .result-badge {
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        .result-badge.normal {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--normal-color);
+        }
+        .result-badge.abnormal {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--abnormal-color);
+        }
+        .exam-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .exam-image:hover {
+            transform: scale(1.02);
+        }
+        .exam-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-sm {
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
+        .empty-timeline {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-top: 30px;
+        }
+        .empty-icon {
+            font-size: 5rem;
+            color: #b0bec5;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="의료 이미지 AI 로고" class="header-logo">
+                    의료 이미지 진단 지원 시스템
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="bi bi-house-door"></i> 홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/patients"><i class="bi bi-people"></i> 환자 관리</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about"><i class="bi bi-info-circle"></i> 소개</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 플래시 메시지 표시 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2><i class="bi bi-person-badge"></i> 환자 상세 정보</h2>
+                    <a href="/patients" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>환자 목록으로 돌아가기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 환자 기본 정보 카드 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-person-vcard"></i> 환자 정보</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="patient-info">
+                            <div class="patient-info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">환자 ID</span>
+                                    <span class="info-value">{{ patient.patient_id }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">이름</span>
+                                    <span class="info-value">{{ patient.name }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">성별</span>
+                                    <span class="info-value">
+                                        {% if patient.sex == 'M' %}
+                                            <i class="bi bi-gender-male text-primary"></i> 남성
+                                        {% elif patient.sex == 'F' %}
+                                            <i class="bi bi-gender-female text-danger"></i> 여성
+                                        {% else %}
+                                            <i class="bi bi-question-circle"></i> 기타
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">나이</span>
+                                    <span class="info-value">{{ patient.age }}세</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">등록일</span>
+                                    <span class="info-value">{{ patient.created_at|default('정보 없음') }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">검사 횟수</span>
+                                    <span class="info-value">{{ examinations|length }}회</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <a href="/" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>새 검사 진행
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검사 이력 타임라인 -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-clock-history"></i> 검사 이력</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if examinations and examinations|length > 0 %}
+                            <div class="timeline">
+                                {% for exam in examinations %}
+                                    <div class="timeline-item {% if exam.result == '정상' %}normal{% elif exam.result == '비정상' %}abnormal{% endif %}">
+                                        <div class="timeline-date">
+                                            <i class="bi bi-calendar-event me-1"></i> {{ exam.created_at|default('날짜 정보 없음') }}
+                                        </div>
+                                        <div class="timeline-title">
+                                            {{ exam.exam_type|default('미분류') }} 검사
+                                            <span class="result-badge {% if exam.result == '정상' %}normal{% elif exam.result == '비정상' %}abnormal{% endif %}">
+                                                {% if exam.result == '정상' %}
+                                                    <i class="bi bi-check-circle me-1"></i> 정상
+                                                {% elif exam.result == '비정상' %}
+                                                    <i class="bi bi-exclamation-triangle me-1"></i> 비정상
+                                                {% else %}
+                                                    <i class="bi bi-question-circle me-1"></i> 미확인
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="timeline-body">
+                                            <p>
+                                                <span class="badge bg-light text-dark">진단 확률: {{ exam.probability|round(2) }}%</span>
+                                            </p>
+                                            {% if exam.image_path %}
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <img src="{{ url_for('static', filename='uploads/' + exam.image_path|basename) }}" alt="검사 이미지" class="exam-image">
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            <div class="exam-actions">
+                                                {% if exam.report_path %}
+                                                    <a href="{{ url_for('view_report', filename=exam.report_path|basename) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                        <i class="bi bi-eye me-1"></i> 보고서 보기
+                                                    </a>
+                                                    <a href="{{ url_for('download_report', filename=exam.report_path|basename) }}" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="bi bi-download me-1"></i> 보고서 다운로드
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-timeline">
+                                <i class="bi bi-clock-history empty-icon"></i>
+                                <h4 class="mb-3">검사 이력이 없습니다</h4>
+                                <p class="text-muted mb-4">새로운 검사를 진행하여 환자의 검사 기록을 추가하세요.</p>
+                                <a href="/" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-plus-circle me-2"></i>새 검사 시작하기
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center">
+        <div class="container">
+            <p><i class="bi bi-heart-fill me-2 text-danger"></i> 2023 의료 이미지 진단 지원 시스템. All rights reserved.</p>
+            <p><i class="bi bi-award me-2"></i> AI 소프트웨어학과 포트폴리오 프로젝트</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 이미지 클릭 시 전체화면으로 표시
+            const examImages = document.querySelectorAll('.exam-image');
+            examImages.forEach(image => {
+                image.addEventListener('click', function() {
+                    if (this.classList.contains('fullscreen')) {
+                        this.classList.remove('fullscreen');
+                        this.style.position = '';
+                        this.style.top = '';
+                        this.style.left = '';
+                        this.style.width = '';
+                        this.style.height = '';
+                        this.style.zIndex = '';
+                    } else {
+                        this.classList.add('fullscreen');
+                        this.style.position = 'fixed';
+                        this.style.top = '50%';
+                        this.style.left = '50%';
+                        this.style.transform = 'translate(-50%, -50%)';
+                        this.style.maxWidth = '90%';
+                        this.style.maxHeight = '90vh';
+                        this.style.zIndex = '1000';
+                    }
+                });
+            });
+
+            // 전체화면 모드 종료
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const fullscreenImage = document.querySelector('.exam-image.fullscreen');
+                    if (fullscreenImage) {
+                        fullscreenImage.classList.remove('fullscreen');
+                        fullscreenImage.style.position = '';
+                        fullscreenImage.style.top = '';
+                        fullscreenImage.style.left = '';
+                        fullscreenImage.style.width = '';
+                        fullscreenImage.style.height = '';
+                        fullscreenImage.style.zIndex = '';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

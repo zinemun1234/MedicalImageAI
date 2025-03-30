@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>의료 이미지 진단 시스템 - 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary-color: #26a69a;
+            --accent-color: #ff5722;
+            --normal-color: #4caf50;
+            --abnormal-color: #f44336;
+            --light-bg: #f5f7fa;
+            --dark-text: #37474f;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            padding-top: 20px;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .header-logo {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .jumbotron {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid var(--primary-color);
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .btn {
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        .stats-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .stats-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .stats-card .label {
+            font-size: 1rem;
+            color: #78909c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1.5rem;
+        }
+        .icon-large {
+            font-size: 2.5rem;
+        }
+        .heart-pulse-icon {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 네비게이션 바 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 mb-4 shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <i class="bi bi-heart-pulse text-primary me-2 heart-pulse-icon"></i>
+                    <span class="fw-bold">의료 이미지 진단 시스템</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="메뉴 토글" aria-controls="navbarNav" aria-expanded="false" aria-label="메뉴 토글">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="bi bi-house-door me-1"></i> 홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/patients"><i class="bi bi-people me-1"></i> 환자 관리</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/dashboard"><i class="bi bi-graph-up me-1"></i> 대시보드</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about"><i class="bi bi-info-circle me-1"></i> 정보</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 헤더 -->
+        <div class="jumbotron">
+            <h1 class="display-5 fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>데이터 분석 대시보드</h1>
+            <p class="lead">
+                시스템 데이터 분석 및 통계 정보를 확인할 수 있습니다. 이 페이지는 진단 결과와 환자 정보를 기반으로 한 데이터 시각화를 제공합니다.
+            </p>
+        </div>
+
+        <!-- 주요 통계 수치 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <i class="bi bi-people text-primary mb-2 icon-large"></i>
+                    <div class="number">{{ statistics.total_patients }}</div>
+                    <div class="label">전체 환자</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <i class="bi bi-clipboard2-pulse text-success mb-2 icon-large"></i>
+                    <div class="number">{{ statistics.total_exams }}</div>
+                    <div class="label">전체 검사</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <i class="bi bi-check-circle text-success mb-2 icon-large"></i>
+                    <div class="number">{{ statistics.results.get('정상', 0) }}</div>
+                    <div class="label">정상 결과</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <i class="bi bi-exclamation-triangle text-danger mb-2 icon-large"></i>
+                    <div class="number">{{ statistics.results.get('비정상', 0) }}</div>
+                    <div class="label">비정상 결과</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 차트 섹션 -->
+        <div class="row">
+            <!-- 결과 분포 차트 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-pie-chart me-2"></i> 진단 결과 분포
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="resultDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 검사 유형별 차트 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-bar-chart me-2"></i> 검사 유형 분포
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="examTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 월별 추이 차트 -->
+            <div class="col-md-8 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up me-2"></i> 월별 검사 추이
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="monthlyTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 성별 분포 차트 -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-gender-ambiguous me-2"></i> 성별 분포
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height: 250px;">
+                            <canvas id="genderStatsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 나이 분포 차트 -->
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-bar-chart-steps me-2"></i> 나이대별 환자 분포
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="ageGroupsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 데이터 스크립트 (린터 무시) -->
+    <script id="statistics-data" type="application/json">
+        {{ statistics|tojson }}
+    </script>
+    
+    <!-- 차트 스크립트 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 데이터 가져오기
+            const statisticsJson = document.getElementById('statistics-data').textContent;
+            const statisticsData = JSON.parse(statisticsJson);
+            
+            // 결과 분포 차트
+            const resultCtx = document.getElementById('resultDistributionChart').getContext('2d');
+            const resultLabels = Object.keys(statisticsData.results);
+            const resultData = Object.values(statisticsData.results);
+            const resultDistributionChart = new Chart(resultCtx, {
+                type: 'pie',
+                data: {
+                    labels: resultLabels,
+                    datasets: [{
+                        data: resultData,
+                        backgroundColor: ['#4caf50', '#f44336'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 검사 유형 차트
+            const examTypeCtx = document.getElementById('examTypeChart').getContext('2d');
+            const examTypeLabels = Object.keys(statisticsData.exam_types);
+            const examTypeData = Object.values(statisticsData.exam_types);
+            const examTypeChart = new Chart(examTypeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: examTypeLabels,
+                    datasets: [{
+                        data: examTypeData,
+                        backgroundColor: [
+                            '#1e88e5', '#26a69a', '#7e57c2', '#ff5722', '#43a047'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 월별 추세 차트
+            const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+            const monthlyTrendChart = new Chart(monthlyTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(statisticsData.monthly_trend),
+                    datasets: [{
+                        label: '검사 건수',
+                        data: Object.values(statisticsData.monthly_trend),
+                        borderColor: '#1e88e5',
+                        backgroundColor: 'rgba(30,136,229,0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1e88e5',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 성별 분포 차트
+            const genderStatsCtx = document.getElementById('genderStatsChart').getContext('2d');
+            const genderLabels = Object.keys(statisticsData.gender_stats);
+            const genderData = Object.values(statisticsData.gender_stats);
+            const genderStatsChart = new Chart(genderStatsCtx, {
+                type: 'pie',
+                data: {
+                    labels: genderLabels,
+                    datasets: [{
+                        data: genderData,
+                        backgroundColor: ['#1e88e5', '#ec407a'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 연령대별 분포 차트
+            const ageGroupsCtx = document.getElementById('ageGroupsChart').getContext('2d');
+            const ageGroupsChart = new Chart(ageGroupsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(statisticsData.age_groups),
+                    datasets: [{
+                        label: '환자 수',
+                        data: Object.values(statisticsData.age_groups),
+                        backgroundColor: '#7e57c2',
+                        borderRadius: 5,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}진단 결과{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-md me-2"></i>환자 정보
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>환자 ID:</strong> {{ patient_id|default('미입력', true) }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>환자 이름:</strong> {{ patient_name|default('미입력', true) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>진단 결과
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="card-subtitle mb-2 text-muted">원본 이미지</h6>
+                            <div class="text-center">
+                                <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="원본 이미지" class="img-fluid img-thumbnail" style="max-height: 300px;">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="card-subtitle mb-2 text-muted">히트맵</h6>
+                            <div class="text-center">
+                                <img src="{{ url_for('static', filename='uploads/' + heatmap_filename) }}" alt="GradCAM 결과" class="img-fluid img-thumbnail" style="max-height: 300px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert {{ 'alert-danger' if prediction == 'Abnormal' else 'alert-success' }} text-center">
+                                <h4>진단 결과: {{ '비정상' if prediction == 'Abnormal' else '정상' }}</h4>
+                                <p>확률: {{ probability }}</p>
+                                <p>{{ '이 이미지는 비정상으로 판정되었습니다. 추가 검사가 필요할 수 있습니다.' if prediction == 'Abnormal' else '이 이미지는 정상으로 판정되었습니다.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-1"></i> 홈으로
+                </a>
+                <button class="btn btn-secondary ms-2" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i> 인쇄
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
