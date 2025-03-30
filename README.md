@@ -163,7 +163,3 @@ medical-image-ai/
 ## 라이선스
 
 MIT 라이선스
-
-## 연락처
-
-이메일: your.email@example.com 
